@@ -1,45 +1,78 @@
 import random
 
-x = random.randint(1, 20)
-ran = list(range(0, 10)) * x #random list of number
+def countTries():
+    '''
+    appends the player's trie's numbers to list so we can use len function
+    :return: add numbers to list
+    '''
+    tries.append(stepsNum)
 
-with open(r'C:\Users\lidor\Desktop\hodi\FindTreasure.txt','w') as writeTreasure:
-    y = random.randint(0, x * 10)
-    ran[y] = 'TREASURE' #insert the string in a random index(place)
-    ran = str(ran)
-    writeTreasure.write(ran)
-    length = len(ran)
-    print(f'The length of number is {length-1}') #show the player the length of options
+def forwardPointerMove():
+    '''
+    insert number of steps + the place pointer is, minus 1 place (starting from 0)
+    :return: move seek back and print the syntax where the pointer is
+    '''
+    FWplace = (int(readTreaser.tell()) + stepsNum) -1
+    readTreaser.seek(FWplace)
+    print(readTreaser.readline(1))
 
-with open(r'C:\Users\lidor\Desktop\hodi\FindTreasure.txt') as readTreasure:
-    fullList = ['A', 'E', 'E', 'R', 'R', 'S', 'T', 'U'] #sorted list of the word TREASURE
-    emptyList = []
-    numberOfTry = []
+def backwardsPointerMove():
+    '''
+    insert number of steps - the place pointer is, minus 1 place (starting from 0)
+    :return: move seek back and print the syntax where the pointer is
+    '''
+    BWplace = (int(readTreaser.tell()) - stepsNum) - 1
+    readTreaser.seek(BWplace)
+    print(readTreaser.readline(1))
+
+def treasureFound():
+    '''
+    Move pointer step back for printing the right place
+    :return: if the pointer prints one letter from 'TREASURE' then there is a win
+    '''
+    readTreaser.seek(readTreaser.tell() - 1)
+    if readTreaser.readline(1).isalpha():
+        return True
+
+with open(r'C:\Users\lidor\Desktop\hodi\FindTreasure.txt','w') as writeTreaser: # open as 'w' to overwrite file
+    x = random.randint(1, 20) # Random times to print the numbers(0-9)
+    for num in range(0, 10):
+        num1 = str(num) # string to write file
+        numlist = num1 * x # duplicate every number at random times
+        writeTreaser.writelines(numlist)
+
+    writeTreaser.writelines('TREASURE') # print the treasure between numbers
+
+    for numR in range(9,-1,-1): # Reversed numbers
+        numR1 = str(numR)
+        numRlist = numR1 * x
+        writeTreaser.writelines(numRlist)
+
+    maxSteps = writeTreaser.tell()
+    print(f'End of steps are in {maxSteps} moves') # Print the amount of steps the player can move
+
+with open(r'C:\Users\lidor\Desktop\hodi\FindTreasure.txt') as readTreaser: # open as 'r' only
+    tries = [] #count the number of player's tries with len function
     while True:
-        try:
-            x = int(input('For Forward hit 1, backwards hit 2: '))
-            numberOfTry.append(x)
-            if 1 <= x <= 2:
-                y = int(input('Enter the numbers of steps: '))
-                if 0 <= y <= length:
-                    readTreasure.seek(y) #move the pointer to the steps player inserted
-                    where = readTreasure.tell() #where is the pointer
-                    print(ran[where]) #print the string of the place the player moved to
-                    if ran[where] == 'T' or ran[where] == 'R' or ran[where] == 'E' or ran[where] == 'A' or \
-                        ran[where] == 'S' or ran[where] == 'U' or ran[where] == 'R' or ran[where] == 'E':
-                        emptyList.append(ran[where])
-                        emptyList.sort()
-                        print(emptyList)
-                        if emptyList == fullList:
-                            print('You found the treasure!!!')
-                            tries = len(numberOfTry)
-                            print(f'Number Of Tries are {tries}')
-                            break
-                else: print('Out Of Range!')
-            else: print('Wrong Direction!')
+        try:  # The player need to insert an int!
+            stepsNum = int(input('How many step would you like to go? '))
+            if stepsNum > maxSteps: #check that the player's steps not out of range
+                print('Out of range, please try again')
+                continue
+            direction = int(input('Press 1 to move FORWARD, Press 2 for BACKWARDS '))
+            if direction == 1: # checks if the player choose right direction
+                forwardPointerMove()
+                countTries()
+            elif direction == 2: # checks if the player choose right direction
+                backwardsPointerMove()
+                countTries()
+            else:
+                print('Out of Range')
+                continue #if direction not 1 or 2
         except:
-            print('Out of the rules!') #if the player inserted anything else but string
+            print('Error Value!')
+            continue
 
-with open(r'C:\Users\lidor\Desktop\hodi\FindTreasure.txt','a+') as score:
-    for num in score.readline():
-        print(num)
+        if treasureFound() == True:
+            print(f'Number of tries are {len(tries)}') # print the number of player's tries
+            break
